@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.updateProduct = exports.createNewProduct = exports.getProductByProductId = exports.getAllProducts = void 0;
+exports.search = exports.deleteProduct = exports.updateProduct = exports.createNewProduct = exports.getProductByProductId = exports.getAllProducts = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const products_model_1 = require("../models/products.model");
 const ApiResponse_1 = require("../utils/ApiResponse");
@@ -87,4 +87,28 @@ exports.deleteProduct = (0, express_async_handler_1.default)((req, res) => __awa
     if (!productToBeDeleted)
         res.status(404).json(new Error('product not found'));
     res.status(200).json(new ApiResponse_1.ApiResponse(201, productToBeDeleted, "product deleted successfully"));
+}));
+exports.search = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const searchQuery = req.query.product;
+    console.log(searchQuery);
+    const productResults = yield products_model_1.Product.find({
+        $or: [
+            { name: { $regex: searchQuery, $options: 'i' } },
+            { description: { $regex: searchQuery, $options: 'i' } } // 
+        ]
+    });
+    const variantResults = yield variantSchema_1.Variant.find({
+        name: { $regex: searchQuery, $options: 'i' }
+    });
+    const response = {
+        products: productResults.length > 0 ? productResults : null,
+        variants: variantResults.length > 0 ? variantResults : null
+    };
+    console.log(response);
+    if (!response.products && !response.variants) {
+        res.status(404).json(new ApiResponse_1.ApiResponse(404, response, 'products not found'));
+    }
+    else {
+        res.status(200).json(new ApiResponse_1.ApiResponse(200, response, 'Products found successfully'));
+    }
 }));

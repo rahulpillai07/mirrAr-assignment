@@ -8,4 +8,5 @@ router.route("/getAllProducts").get(product_controller_1.getAllProducts);
 router.route("/getProductById/:id").get(product_controller_1.getProductByProductId);
 router.route("/updateProduct/:id").patch(product_controller_1.updateProduct);
 router.route("/deleteProduct/:id").delete(product_controller_1.deleteProduct);
+router.route("/search").get(product_controller_1.search);
 exports.default = router;

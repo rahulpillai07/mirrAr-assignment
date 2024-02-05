@@ -117,3 +117,35 @@ export const deleteProduct=asyncHandler(async(req:Request,res:Response)=>{
     if(!productToBeDeleted)res.status(404).json( new Error('product not found'));
     res.status(200).json(new ApiResponse(201,productToBeDeleted,"product deleted successfully"));
 })
+interface searchResponse{
+    products:any[],
+    variants?:any[]
+}
+export const search=asyncHandler(async(req:Request,res:Response)=>{
+    const searchQuery:string=req.query.product as string;
+    console.log(searchQuery);
+    
+    const productResults = await Product.find({
+        $or: [
+            { name: { $regex: searchQuery, $options: 'i' } }, 
+            { description: { $regex: searchQuery, $options: 'i' } } // 
+        ]
+    });
+
+   
+    const variantResults = await Variant.find({
+        name: { $regex: searchQuery, $options: 'i' } 
+    });
+
+
+    const response= {
+        products: productResults.length > 0 ? productResults : null,
+        variants: variantResults.length > 0 ? variantResults : null
+    };
+    console.log(response);
+    if (!response.products && !response.variants) {
+        res.status(404).json(new ApiResponse(404,response,'products not found'));
+    } else {
+        res.status(200).json(new ApiResponse(200, response, 'Products found successfully'));
+    }
+})
